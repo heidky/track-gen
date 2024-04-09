@@ -11,10 +11,15 @@
     player.onState = (isPlaying) => (started = isPlaying)
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
-
-<button onclick={() => player.start()}>Start</button>
-<button onclick={() => player.stop()}>Stop</button>
-<p>{started ? 'hi' : 'no'}</p>
+<button
+    class="rounded-md bg-green-500 px-2 py-1 disabled:bg-gray-500"
+    onclick={() => player.start()}
+    disabled={started}>Start</button
+>
+<button
+    class="rounded-md bg-red-500 px-2 py-1 disabled:bg-gray-500"
+    onclick={() => player.stop()}
+    disabled={!started}>Stop</button
+>
+<p class="mb-10 mt-1">{started ? 'Started' : 'Stopped'}</p>
 <Scope node={player.output} />

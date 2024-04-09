@@ -2,6 +2,8 @@
     import { drawSignal } from '$lib/audio/utils'
     import * as Tone from 'tone'
 
+    const FPS = 30
+    const VIEW_FREQ = 50
     let { node } = $props()
     let canvas: HTMLCanvasElement
     let analyzer: Tone.Analyser
@@ -14,12 +16,11 @@
     })
 
     $effect(() => {
-        // console.log(1 / analyzer.sampleTime)
         const interval = setInterval(() => {
-            drawSignal(canvas, analyzer.getValue() as Float32Array, 50)
-        }, 1000 / 10)
+            drawSignal(canvas, analyzer.getValue() as Float32Array, VIEW_FREQ)
+        }, 1000 / FPS)
         return () => clearInterval(interval)
     })
 </script>
 
-<canvas width="400" height="200" bind:this={canvas} />
+<canvas class="flex overflow-hidden rounded-md" width="400" height="200" bind:this={canvas} />

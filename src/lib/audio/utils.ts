@@ -6,12 +6,13 @@ export function drawSignal(
 ) {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
+    // console.time('draw-scope')
 
     const w = canvas.width
     const h = canvas.height
-    const drawNumSamples = (F / drawFreq) * 2
+    const numSamplesToDraw = (F / drawFreq) * 2
 
-    if (signal.length * 0.5 < drawNumSamples) {
+    if (numSamplesToDraw * 2 > signal.length) {
         console.warn('not enough sample for canvas', canvas)
     }
 
@@ -19,34 +20,39 @@ export function drawSignal(
     ctx.fillStyle = '#333'
     ctx.fillRect(0, 0, w, h)
 
-    let offset = 0
-    let detectActive = false
-    const lookBack = 5
-    const marginY = 0.01
-    const triggerY = signal.reduce((prev, curr) => Math.max(prev, curr)) - marginY
+    // find the first index in signal that triggers the scope (raise, trieggerY)
+    let triggerIndex = 0
+    let soundDetected = false
+    const backOffeset = 5
+    const noiseMarginY = 0.01
+    const triggerLevelY = signal.reduce((prev, curr) => Math.max(prev, curr)) - noiseMarginY
 
-    for (let i = lookBack; i < signal.length - drawNumSamples - 1; i++) {
-        const y = signal[i]
-        const yPrev = signal[i - lookBack]
+    for (let i = backOffeset; i < signal.length - numSamplesToDraw - 1; i++) {
+        const y2 = signal[i]
+        const y1 = signal[i - backOffeset]
 
-        if (y > marginY) detectActive = true
-
-        if (yPrev < triggerY && y > triggerY) {
-            offset = i
+        if (y1 < triggerLevelY && y2 > triggerLevelY) {
+            triggerIndex = i
             break
         }
+
+        // check if something is played
+        if (y2 > noiseMarginY) soundDetected = true
     }
 
-    if (detectActive && offset === 0) console.warn('no trigger for scope', canvas)
+    if (soundDetected && triggerIndex === 0) console.warn('no trigger for scope', canvas)
 
-    // console.log(offset)
-
-    //line
+    // draw line, a small square for each sample to draw
     ctx.fillStyle = 'white'
-    for (let i = 0; i < drawNumSamples; ++i) {
-        const x = i * (w / drawNumSamples)
-        const y = h - (h / 2 + ((signal[offset + i] * h) / 2) * 0.99)
-        ctx.fillRect(x, y, 2, 2)
+    for (let i = 0; i < numSamplesToDraw; ++i) {
+        const canvasX = i * (w / numSamplesToDraw)
+        const y = signal[triggerIndex + i]
+        const canvasY = h / 2 - (y * h) / 2
+        ctx.fillRect(canvasX, canvasY, 2, 2)
     }
-    // console.log('draw')
+    // console.timeEnd('draw-scope')
+}
+
+export function clamp(x: number, min: number, max: number) {
+    return Math.min(Math.max(x, min), max)
 }
