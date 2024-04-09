@@ -1,9 +1,11 @@
 import * as Tone from 'tone'
 import { clamp } from './utils'
 
+const NORMALIZATION = 0.707
+
 const defaultConfig = {
-    carrierFreq: 400,
-    normalization: 0.95,
+    carrierFreq: 800,
+    normalization: NORMALIZATION, // 0.707 => -3db
     pulseFreq: 50,
     pulseSquish: 1,
 }
@@ -18,15 +20,16 @@ export default class BaseOscillator {
     readonly pulseSquish: Tone.Signal
 
     private _config: BaseConfig = defaultConfig
+    private _volume: number = 0.5
+
     public onState?: (isPlaying: boolean) => void
     public rampTime = 5
 
     constructor(public readonly context: Tone.Context = Tone.getContext() as any) {
-        const volume = 1
         const config = this.config
 
         const output = new Tone.Gain({ context, gain: 0 })
-        const volumeGain = new Tone.Gain({ context, gain: volume })
+        const volumeGain = new Tone.Gain({ context, gain: this.volume })
         const normGain = new Tone.Gain({ context, gain: config.normalization })
         const amGain = new Tone.Gain({ context, gain: 0 })
         const oscillator = new Tone.Oscillator({
@@ -80,9 +83,13 @@ export default class BaseOscillator {
         this.onState?.(false)
     }
 
-    setConfig(config: BaseConfig) {
+    set config(config: BaseConfig) {
         const c = { ...config }
-        c.normalization = 0.95
+        c.normalization = NORMALIZATION // force to be constant, will change in the future
+        if (c.normalization < 0 || c.normalization > 1) {
+            c.normalization = 0
+            console.error('wrong normalization value')
+        }
         c.carrierFreq = clamp(c.carrierFreq, 50, 1000)
         c.pulseFreq = clamp(c.pulseFreq, 1, 150)
         c.pulseSquish = clamp(c.pulseSquish, 0, 5)
@@ -94,21 +101,16 @@ export default class BaseOscillator {
     }
 
     get config() {
-        return this._config
+        return { ...this._config }
+    }
+
+    set volume(value: number) {
+        value = clamp(value, 0, 1)
+        this._volume = value
+        this.volumeGain.gain.value = value
+    }
+
+    get volume() {
+        return this._volume
     }
 }
-
-// const pulseAddBias = new Tone.Add({ context })
-// pulseBiasSignal.connect(pulseAddBias.addend)
-// pulseOsc.connect(pulseAddBias)
-
-// const pulseAddOne = new Tone.Add({ context, value: 1 })
-// const pulsePow = new Tone.Pow({ context, value: -1 })
-// pulseBiasSignal.chain(pulseAddOne, pulsePow)
-
-// const pulseMult = new Tone.Multiply({ context, minValue: 0 })
-// pulsePow.connect(pulseMult.factor)
-// pulseAddBias.connect(pulseMult)
-
-// pulseMult.connect(amGain.gain)
-// osc.connect(amGain)
