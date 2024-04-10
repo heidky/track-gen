@@ -16,9 +16,18 @@ export function drawSignal(
         console.warn('not enough sample for canvas', canvas)
     }
 
-    // background
-    ctx.fillStyle = '#333'
+    // background + grid
+    ctx.fillStyle = '#222'
     ctx.fillRect(0, 0, w, h)
+    ctx.fillStyle = '#555'
+    ctx.fillRect(0, (h * 1) / 2, w, 2)
+    ctx.fillRect(0, (h * 1) / 4, w, 2)
+    ctx.fillRect(0, (h * 3) / 4, w, 2)
+    ctx.fillStyle = '#333'
+    ctx.fillRect(0, (h * 1) / 8, w, 2)
+    ctx.fillRect(0, (h * 3) / 8, w, 2)
+    ctx.fillRect(0, (h * 5) / 8, w, 2)
+    ctx.fillRect(0, (h * 7) / 8, w, 2)
 
     // find the first index in signal that triggers the scope (raise, trieggerY)
     let triggerIndex = 0
@@ -43,7 +52,7 @@ export function drawSignal(
     if (soundDetected && triggerIndex === 0) console.warn('no trigger for scope', canvas)
 
     // draw line, a small square for each sample to draw
-    ctx.fillStyle = 'white'
+    ctx.fillStyle = 'orange'
     for (let i = 0; i < numSamplesToDraw; ++i) {
         const canvasX = i * (w / numSamplesToDraw)
         const y = signal[triggerIndex + i]

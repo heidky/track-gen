@@ -10,6 +10,10 @@ const defaultConfig = {
     pulseSquish: 1,
 }
 
+export function getDefaultConfig() {
+    return { ...defaultConfig }
+}
+
 export type BaseConfig = typeof defaultConfig
 
 export default class BaseOscillator {
@@ -83,7 +87,7 @@ export default class BaseOscillator {
         this.onState?.(false)
     }
 
-    set config(config: BaseConfig) {
+    static sanitazieConfig(config: BaseConfig) {
         const c = { ...config }
         c.normalization = NORMALIZATION // force to be constant, will change in the future
         if (c.normalization < 0 || c.normalization > 1) {
@@ -93,11 +97,15 @@ export default class BaseOscillator {
         c.carrierFreq = clamp(c.carrierFreq, 50, 1000)
         c.pulseFreq = clamp(c.pulseFreq, 1, 150)
         c.pulseSquish = clamp(c.pulseSquish, 0, 5)
-        this._config = c
+        return c
+    }
 
-        this.oscillator.frequency.value = c.carrierFreq
-        this.pulseOscillator.frequency.value = c.pulseFreq
-        this.pulseSquish.value = c.pulseSquish
+    set config(config: BaseConfig) {
+        this._config = BaseOscillator.sanitazieConfig(config)
+
+        this.oscillator.frequency.value = this._config.carrierFreq
+        this.pulseOscillator.frequency.value = this._config.pulseFreq
+        this.pulseSquish.value = this._config.pulseSquish
     }
 
     get config() {
