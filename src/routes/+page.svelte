@@ -52,51 +52,71 @@
     add()
 </script>
 
-<button
-    class="rounded-md bg-green-500 px-2 py-1 disabled:bg-gray-500"
-    onclick={() => player.start()}
-    disabled={started}>Start</button
->
-<button
-    class="rounded-md bg-red-500 px-2 py-1 disabled:bg-gray-500"
-    onclick={() => player.stop()}
-    disabled={!started}>Stop</button
->
-<p class="mb-10 mt-1">{started ? 'Started' : 'Stopped'}</p>
+<div class="flex flex-row">
+    <div class="w-1/2">
+        <div class="mb-4 flex flex-row items-center justify-start gap-x-8">
+            <h1 class="text-3xl text-zinc-200">Tracks</h1>
 
-<Scope node={player.output} />
-
-<button class="mb-4 mt-8 rounded-md bg-gray-400 px-3 py-1.5 hover:bg-gray-600" onclick={add}
-    >Add</button
->
-
-<div class="flex flex-col items-start gap-y-2">
-    {#each configs as config, index}
-        <div
-            class="border-1 flex items-center gap-x-2 rounded-xl bg-zinc-700 p-3 {selected !== index
-                ? 'border border-gray-700'
-                : 'border border-orange-400'}"
-        >
-            <span class="text-xl font-bold text-gray-400">~</span>
-            <InputBox bind:value={config.carrierFreq} className="w-24" format={freq()} units="Hz" />
-            <InputBox bind:value={config.volume} className="w-16" format={gain()} />
-            <span class="text-xl font-bold text-gray-400">^</span>
-            <InputBox bind:value={config.pulseFreq} className="w-24" format={freq()} units="Hz" />
-            <InputBox bind:value={config.pulseSquish} className="w-16" format={gain()} />
             <button
-                class="ms-2 size-8 rounded-md bg-green-500 disabled:bg-gray-500"
-                onclick={() => play(index)}
-                disabled={started}
+                class="flex size-8 justify-center rounded-md bg-gray-400 px-3 py-0 text-lg font-bold hover:bg-gray-600"
+                onclick={add}>+</button
             >
-                P
-            </button>
-            <button
-                class="size-8 rounded-md bg-red-500 disabled:bg-gray-500"
-                onclick={() => stop()}
-                disabled={selected !== index || !started}
-            >
-                S
-            </button>
         </div>
-    {/each}
+
+        <div class="flex flex-col items-start gap-y-2">
+            {#each configs as config, index}
+                <div
+                    class="border-1 flex items-center gap-x-2 rounded-xl bg-zinc-700 p-3 {selected !==
+                    index
+                        ? 'border border-gray-700'
+                        : 'border border-orange-400'}"
+                >
+                    <span class="text-xl font-bold text-gray-400">~</span>
+                    <InputBox
+                        bind:value={config.carrierFreq}
+                        className="w-24"
+                        format={freq()}
+                        units="Hz"
+                    />
+                    <InputBox bind:value={config.volume} className="w-16" format={gain()} />
+                    <span class="text-xl font-bold text-gray-400">^</span>
+                    <InputBox
+                        bind:value={config.pulseFreq}
+                        className="w-24"
+                        format={freq()}
+                        units="Hz"
+                    />
+                    <InputBox bind:value={config.pulseSquish} className="w-16" format={gain()} />
+                    <button
+                        class="ms-2 size-8 rounded-md bg-green-500 disabled:bg-gray-500"
+                        onclick={() => play(index)}
+                        disabled={started}
+                    >
+                        P
+                    </button>
+                    <button
+                        class="size-8 rounded-md bg-red-500 disabled:bg-gray-500"
+                        onclick={() => stop()}
+                        disabled={selected !== index || !started}
+                    >
+                        S
+                    </button>
+                </div>
+            {/each}
+        </div>
+    </div>
+
+    <div>
+        <h1 class="mb-4 text-3xl text-zinc-200">Scope</h1>
+
+        <Scope node={player.output} />
+
+        <button
+            class="mt-8 w-full rounded-md bg-red-500 px-2 py-1 text-center disabled:bg-gray-500"
+            onclick={() => player.stop()}
+            disabled={!started}>Stop All</button
+        >
+    </div>
 </div>
+
+<svelte:window onkeydown={(e) => e.key === ' ' && player.stop()} />
