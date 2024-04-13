@@ -37,7 +37,7 @@ export function gain(): NumberFormatter {
 
 export function squish(): NumberFormatter {
     return {
-        into: (x: number) => x.toFixed(1) || '0.0',
+        into: (x: number) => x.toFixed(1) || '1.0',
         from: (x: string) => parseFloat(x) || 0,
     }
 }
