@@ -30,6 +30,13 @@ export interface NumberFormatter {
 
 export function gain(): NumberFormatter {
     return {
+        into: (x: number) => x.toFixed(2) || '0.0',
+        from: (x: string) => parseFloat(x) || 0,
+    }
+}
+
+export function squish(): NumberFormatter {
+    return {
         into: (x: number) => x.toFixed(1) || '0.0',
         from: (x: string) => parseFloat(x) || 0,
     }

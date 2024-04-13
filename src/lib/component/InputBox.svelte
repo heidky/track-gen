@@ -4,11 +4,13 @@
     let {
         value = $bindable(),
         format = gain(),
+        step = 0.1,
         units,
         className = '',
     }: {
         value: number
         format: NumberFormatter
+        step?: number
         units?: string
         className?: string
     } = $props()
@@ -20,12 +22,12 @@
 
 <div class="{className} relative flex items-center">
     <input
-        class="chakra-petch-regular align-midlle inline-block w-full rounded-md bg-gray-900 pt-0.5 text-center text-white"
+        class="chakra-petch-regular align-midlle inline-block w-full rounded-md bg-gray-900 pt-0.5 text-center"
         value={formatted}
         type="number"
         onchange={onUpdate}
         onpaste={onUpdate}
-        step={0.1}
+        {step}
     />
     {#if units}
         <span

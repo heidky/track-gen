@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { freq, gain } from '$lib'
+    import { freq, gain, squish } from '$lib'
     import '$lib/audio'
     // import { startOsc, stopOsc, started } from '$lib/audio'
     import BaseOscillator, { getDefaultConfig } from '$lib/audio/BaseOscillator'
@@ -77,16 +77,28 @@
                         className="w-24"
                         format={freq()}
                         units="Hz"
+                        step={50}
                     />
-                    <InputBox bind:value={config.volume} className="w-16" format={gain()} />
+                    <InputBox
+                        bind:value={config.volume}
+                        className="w-16 text-yellow-500"
+                        format={gain()}
+                        step={0.01}
+                    />
                     <span class="text-xl font-bold text-gray-400">^</span>
                     <InputBox
                         bind:value={config.pulseFreq}
                         className="w-24"
                         format={freq()}
                         units="Hz"
+                        step={1}
                     />
-                    <InputBox bind:value={config.pulseSquish} className="w-16" format={gain()} />
+                    <InputBox
+                        bind:value={config.pulseSquish}
+                        className="w-16 text-cyan-500"
+                        format={squish()}
+                        step={0.1}
+                    />
                     <button
                         class="ms-2 size-8 rounded-md bg-green-500 disabled:bg-gray-500"
                         onclick={() => play(index)}
