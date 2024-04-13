@@ -1,7 +1,9 @@
 <script lang="ts">
+    import { freq, gain } from '$lib'
     import '$lib/audio'
     // import { startOsc, stopOsc, started } from '$lib/audio'
     import BaseOscillator, { getDefaultConfig } from '$lib/audio/BaseOscillator'
+    import InputBox from '$lib/component/InputBox.svelte'
     import Scope from '$lib/component/Scope.svelte'
     import { unstate, untrack } from 'svelte'
 
@@ -64,32 +66,37 @@
 
 <Scope node={player.output} />
 
-<button class="mt-8" onclick={add}>Add</button>
+<button class="mb-4 mt-8 rounded-md bg-gray-400 px-3 py-1.5 hover:bg-gray-600" onclick={add}
+    >Add</button
+>
 
-<div class="flex flex-col gap-y-2">
+<div class="flex flex-col items-start gap-y-2">
     {#each configs as config, index}
-        <div class="flex items-center gap-x-2">
-            <input type="number" bind:value={config.carrierFreq} />
-            <input type="number" bind:value={config.volume} />
-            <input type="number" bind:value={config.pulseFreq} />
-            <input type="number" bind:value={config.pulseSquish} />
+        <div
+            class="border-1 flex items-center gap-x-2 rounded-xl bg-zinc-700 p-3 {selected !== index
+                ? 'border border-gray-700'
+                : 'border border-orange-400'}"
+        >
+            <span class="text-xl font-bold text-gray-400">~</span>
+            <InputBox bind:value={config.carrierFreq} className="w-24" format={freq()} units="Hz" />
+            <InputBox bind:value={config.volume} className="w-16" format={gain()} />
+            <span class="text-xl font-bold text-gray-400">^</span>
+            <InputBox bind:value={config.pulseFreq} className="w-24" format={freq()} units="Hz" />
+            <InputBox bind:value={config.pulseSquish} className="w-16" format={gain()} />
             <button
-                class="rounded-md bg-green-500 px-2 py-1 disabled:bg-gray-500"
+                class="ms-2 size-8 rounded-md bg-green-500 disabled:bg-gray-500"
                 onclick={() => play(index)}
                 disabled={started}
             >
-                Start
+                P
             </button>
             <button
-                class="rounded-md bg-red-500 px-2 py-1 disabled:bg-gray-500"
+                class="size-8 rounded-md bg-red-500 disabled:bg-gray-500"
                 onclick={() => stop()}
                 disabled={selected !== index || !started}
             >
-                Stop
+                S
             </button>
-            {#if selected === index}
-                <p>Selected</p>
-            {/if}
         </div>
     {/each}
 </div>
