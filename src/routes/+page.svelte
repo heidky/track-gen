@@ -4,6 +4,7 @@
     import { freq, freqDelta, gain, phase, squish } from '$lib'
     import DualOscillator, { type DualOscillatorConfig } from '$lib/audio/DualOscillator'
     import { unstate } from 'svelte'
+    import ScopeTriphase from '$lib/component/ScopeTriphase.svelte'
 
     let started = $state(false)
     let selectedId: number = $state(-1)
@@ -84,14 +85,14 @@
                         </div>
                         <div class="flex flex-row gap-x-1">
                             <InputBox
-                                value={config.carrierFreqDelta}
+                                bind:value={config.carrierFreqDelta}
                                 className="w-20"
                                 format={freqDelta()}
                                 units="Hz"
                                 step={1}
                             />
                             <InputBox
-                                value={config.carrierPhaseDelta}
+                                bind:value={config.carrierPhaseDelta}
                                 className="w-20 text-green-500"
                                 format={phase()}
                                 step={10}
@@ -140,7 +141,7 @@
     <div>
         <h1 class="mb-4 text-3xl text-zinc-200">Scope</h1>
 
-        <Scope node={player.output} />
+        <ScopeTriphase node={player.output} />
 
         <button
             class="mt-8 w-full rounded-md bg-red-500 px-2 py-1 text-center disabled:bg-gray-500"
