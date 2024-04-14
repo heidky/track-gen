@@ -48,3 +48,17 @@ export function freq(): NumberFormatter {
         from: (x: string) => parseFloat(x) || 440,
     }
 }
+
+export function phase(): NumberFormatter {
+    return {
+        into: (x: number) => parseFloat(x as any).toFixed(0) || '0',
+        from: (x: string) => parseFloat(x) || 0,
+    }
+}
+
+export function freqDelta(): NumberFormatter {
+    return {
+        into: (x: number) => parseFloat(x as any).toFixed(0) || '0',
+        from: (x: string) => parseFloat(x) || 0,
+    }
+}

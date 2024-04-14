@@ -1,28 +1,30 @@
 <script lang="ts">
-    import { freq, gain, squish } from '$lib'
-    import '$lib/audio'
-    // import { startOsc, stopOsc, started } from '$lib/audio'
-    import BaseOscillator, { getDefaultConfig } from '$lib/audio/BaseOscillator'
     import InputBox from '$lib/component/InputBox.svelte'
     import Scope from '$lib/component/Scope.svelte'
-    import { unstate, untrack } from 'svelte'
+    import { freq, freqDelta, gain, phase, squish } from '$lib'
+    import DualOscillator, { type DualOscillatorConfig } from '$lib/audio/DualOscillator'
+    import { unstate } from 'svelte'
 
     let started = $state(false)
-    let selected: any = $state(null)
+    let selectedId: number = $state(-1)
 
-    const player = new BaseOscillator()
+    const player = new DualOscillator()
     player.output.toDestination()
     player.onState = (isPlaying) => (started = isPlaying)
 
-    let configs: any[] = $state([])
+    let configs: (DualOscillatorConfig & { id: number })[] = $state([])
 
-    function play(index: number) {
+    function play(id: number) {
+        const index = configs.findIndex((x) => x.id === id)
+        if (index < 0) return
         player.stop()
-        player.config = configs[index]
-        player.volume = configs[index].volume
-        configs[index] = player.config
-        configs[index].volume = player.volume
-        selected = index
+
+        const c = configs[index]
+        player.config = c
+        configs[index] = { id, ...structuredClone(player.config) }
+        // configs[index] = player.config
+        // configs[index].volume = player.volume
+        selectedId = id
         player.start()
     }
 
@@ -30,24 +32,16 @@
         player.stop()
     }
 
-    function add() {
-        const c = { volume: 0.5, ...getDefaultConfig() }
-        configs.push(c)
+    function getMaxId() {
+        return configs.map((x) => x.id).reduce((prev, curr) => (curr > prev ? curr : prev), -1)
     }
 
-    $effect(() => {
-        untrack(() => {
-            const data = localStorage.getItem('configs-base')
-            if (!data) return
-            configs = JSON.parse(data) as any
-            console.log('loaded', unstate(configs))
-        })
-    })
-
-    $effect(() => {
-        localStorage.setItem('configs-base', JSON.stringify(configs))
-        console.log('stored')
-    })
+    function add() {
+        const maxId = getMaxId()
+        const prevConfig = configs.find((x) => x.id === maxId) ?? DualOscillator.defaultConfig
+        const newConfig = { ...structuredClone(unstate(prevConfig)), id: maxId + 1 }
+        configs.push(newConfig)
+    }
 
     add()
 </script>
@@ -64,56 +58,80 @@
         </div>
 
         <div class="flex flex-col items-start gap-y-2">
-            {#each configs as config, index}
+            {#each configs as config}
                 <div
-                    class="border-1 flex items-center gap-x-2 rounded-xl bg-zinc-700 p-3 {selected !==
-                    index
+                    class="border-1 flex items-center gap-x-2 rounded-xl bg-zinc-700 p-2 {selectedId !==
+                    config.id
                         ? 'border border-gray-700'
                         : 'border border-orange-400'}"
                 >
-                    <span class="text-xl font-bold text-gray-400">~</span>
-                    <InputBox
-                        bind:value={config.carrierFreq}
-                        className="w-24"
-                        format={freq()}
-                        units="Hz"
-                        step={50}
-                    />
-                    <InputBox
-                        bind:value={config.volume}
-                        className="w-16 text-yellow-500"
-                        format={gain()}
-                        step={0.01}
-                    />
-                    <span class="text-xl font-bold text-gray-400">^</span>
-                    <InputBox
-                        bind:value={config.pulseFreq}
-                        className="w-24"
-                        format={freq()}
-                        units="Hz"
-                        step={1}
-                    />
-                    <InputBox
-                        bind:value={config.pulseSquish}
-                        className="w-16 text-cyan-500"
-                        format={squish()}
-                        step={0.1}
-                    />
+                    <!-- <span class="text-xl font-bold text-gray-400">~</span> -->
+                    <div class="flex flex-col gap-y-2">
+                        <div class="flex flex-row gap-x-1">
+                            <InputBox
+                                bind:value={config.carrierFreq}
+                                className="w-24"
+                                format={freq()}
+                                units="Hz"
+                                step={50}
+                            />
+                            <InputBox
+                                bind:value={config.volume}
+                                className="w-16 text-yellow-500"
+                                format={gain()}
+                                step={0.01}
+                            />
+                        </div>
+                        <div class="flex flex-row gap-x-1">
+                            <InputBox
+                                value={config.carrierFreqDelta}
+                                className="w-20"
+                                format={freqDelta()}
+                                units="Hz"
+                                step={1}
+                            />
+                            <InputBox
+                                value={config.carrierPhaseDelta}
+                                className="w-20 text-green-500"
+                                format={phase()}
+                                step={10}
+                                units="deg"
+                            />
+                        </div>
+                    </div>
+                    <!-- <span class="text-xl font-bold text-gray-400">^</span> -->
+                    <div class="ms-2 flex flex-col items-end gap-y-2">
+                        <InputBox
+                            bind:value={config.pulseFreq}
+                            className="w-20"
+                            format={freq()}
+                            units="Hz"
+                            step={1}
+                        />
+                        <InputBox
+                            bind:value={config.pulseSquish}
+                            className="w-20 text-cyan-500"
+                            format={squish()}
+                            step={0.1}
+                        />
+                    </div>
 
-                    <button
-                        class="ms-2 size-8 rounded-md bg-green-500 disabled:bg-gray-500"
-                        onclick={() => play(index)}
-                        disabled={started}
-                    >
-                        P
-                    </button>
-                    <button
-                        class="size-8 rounded-md bg-red-500 disabled:bg-gray-500"
-                        onclick={() => stop()}
-                        disabled={selected !== index || !started}
-                    >
-                        S
-                    </button>
+                    <div class="flex flex-row items-center gap-x-2">
+                        <button
+                            class="ms-2 size-8 rounded-md bg-green-500 disabled:bg-gray-500"
+                            onclick={() => play(config.id)}
+                            disabled={started}
+                        >
+                            P
+                        </button>
+                        <button
+                            class="size-8 rounded-md bg-red-500 disabled:bg-gray-500"
+                            onclick={() => stop()}
+                            disabled={selectedId !== config.id || !started}
+                        >
+                            S
+                        </button>
+                    </div>
                 </div>
             {/each}
         </div>
@@ -133,3 +151,17 @@
 </div>
 
 <svelte:window onkeydown={(e) => e.key === ' ' && player.stop()} />
+
+<!-- $effect(() => {
+    untrack(() => {
+        const data = localStorage.getItem('configs-base')
+        if (!data) return
+        configs = JSON.parse(data) as any
+        console.log('loaded', unstate(configs))
+    })
+})
+
+$effect(() => {
+    localStorage.setItem('configs-base', JSON.stringify(configs))
+    console.log('stored')
+}) -->
