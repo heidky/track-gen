@@ -1,10 +1,10 @@
 <script lang="ts">
     import InputBox from '$lib/component/InputBox.svelte'
-    import Scope from '$lib/component/Scope.svelte'
     import { freq, freqDelta, gain, phase, squish } from '$lib'
     import DualOscillator, { type DualOscillatorConfig } from '$lib/audio/DualOscillator'
     import { unstate } from 'svelte'
     import ScopeTriphase from '$lib/component/ScopeTriphase.svelte'
+    import { PlaySolid, PauseSolid } from 'flowbite-svelte-icons'
 
     let started = $state(false)
     let selectedId: number = $state(-1)
@@ -59,9 +59,12 @@
 {/snippet}
 
 {#snippet trackBox(config: typeof configs[0])}
-    <div class="flex flex-row items-center gap-x-2 rounded-xl bg-zinc-700 p-2">
+    <div
+        class="flex flex-row items-center gap-x-2 rounded-xl border border-zinc-900 bg-zinc-700 p-2"
+    >
         <div
-            class="h-12 w-2 shrink-0 self-center rounded-xl py-1 {selectedId === config.id
+            class="h-12 w-2 shrink-0 self-center rounded-xl border border-black border-opacity-50 py-1 {selectedId ===
+            config.id
                 ? 'bg-orange-500'
                 : 'bg-zinc-500'}"
         />
@@ -127,18 +130,19 @@
 
         <div class="flex flex-row items-center gap-x-2 px-1">
             <button
-                class="size-8 rounded-md border border-green-900 bg-green-500 disabled:border-zinc-700 disabled:bg-gray-500"
+                class="flex size-8 items-center rounded-md border border-black border-opacity-50 bg-green-500 disabled:bg-gray-500"
                 onclick={() => play(config.id)}
                 disabled={started}
             >
-                P
+                <PlaySolid class="mx-auto size-6" />
             </button>
             <button
-                class="size-8 rounded-md border border-red-900 bg-red-500 disabled:border-zinc-700 disabled:bg-gray-500"
+                class="flex size-8
+                items-center rounded-md border border-black border-opacity-50 bg-red-500 disabled:bg-gray-500"
                 onclick={() => stop()}
                 disabled={selectedId !== config.id || !started}
             >
-                S
+                <PauseSolid class="mx-auto size-6" />
             </button>
         </div>
     </div>
