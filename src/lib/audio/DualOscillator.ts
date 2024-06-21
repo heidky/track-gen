@@ -1,7 +1,7 @@
 import * as Tone from 'tone'
 import { clamp } from './utils'
 
-const NORMALIZATION = 0.707
+const NORMALIZATION = 0.707 // -3dB
 
 const defaultConfig = {
     volume: 0.5,

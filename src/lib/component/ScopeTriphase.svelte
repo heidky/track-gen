@@ -1,6 +1,6 @@
 <script lang="ts">
     import TriphaseAnalyzer from '$lib/audio/TriphaseAnalyzer'
-    import { drawSignal3D } from '$lib/audio/utils'
+    import { drawSignal3D } from '$lib/component/scope'
 
     const FPS = 10
     const VIEW_FREQ = 50
