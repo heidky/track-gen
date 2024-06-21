@@ -5,9 +5,11 @@
     import { unstate } from 'svelte'
     import ScopeTriphase from '$lib/component/ScopeTriphase.svelte'
     import { PlaySolid, PauseSolid } from 'flowbite-svelte-icons'
+    import { clamp } from '$lib/audio/utils'
 
     let started = $state(false)
     let selectedId: number = $state(-1)
+    let gainBoost = $state({ current: 0, delta: 0 })
 
     const player = new DualOscillator()
     player.output.toDestination()
@@ -16,20 +18,22 @@
     let configs: (DualOscillatorConfig & { id: number })[] = $state([])
 
     function play(id: number) {
-        const index = configs.findIndex((x) => x.id === id)
-        if (index < 0) return
+        const selectedIndex = configs.findIndex((x) => x.id === id)
+        if (selectedIndex < 0) return
         player.stop()
 
-        const c = configs[index]
-        player.config = c
-        configs[index] = { id, ...structuredClone(player.config) }
+        const selectedConfig = configs[selectedIndex]
+        player.config = selectedConfig
+        configs[selectedIndex] = { id, ...structuredClone(player.config) }
         // configs[index] = player.config
         // configs[index].volume = player.volume
         selectedId = id
+        gainBoost = { current: selectedConfig.volume, delta: 0 }
         player.start()
     }
 
     function stop() {
+        gainBoost.delta = 0
         player.stop()
     }
 
@@ -42,6 +46,37 @@
         const prevConfig = configs.find((x) => x.id === maxId) ?? DualOscillator.defaultConfig
         const newConfig = { ...structuredClone(unstate(prevConfig)), id: maxId + 1 }
         configs.push(newConfig)
+    }
+
+    function addGainBoost(offset: number) {
+        if (!started) return
+
+        const current = gainBoost.current
+        const newDelta = clamp(current + gainBoost.delta + offset, 0, 1) - current
+        gainBoost.delta = newDelta
+        updateBoost()
+    }
+
+    function resetBoost() {
+        if (!started) return
+
+        gainBoost.delta = 0
+        updateBoost()
+    }
+
+    function updateBoost() {
+        if (!started) return
+
+        const gainValue = clamp(gainBoost.current + gainBoost.delta, 0, 1)
+        player.setGain(gainValue)
+    }
+
+    function toOffset(value: number): string {
+        if (value >= 0) {
+            return '+' + value.toFixed(2)
+        } else {
+            return value.toFixed(2)
+        }
     }
 
     add()
@@ -148,14 +183,48 @@
     </div>
 {/snippet}
 
-<div class="flex flex-row">
-    <div class="w-1/2">
+<div class="flex flex-row gap-x-32">
+    <div class="">
         {@render trackHeader()}
 
         <div class="flex flex-col items-start gap-y-2">
             {#each configs as config (config.id)}
                 {@render trackBox(config)}
             {/each}
+        </div>
+    </div>
+
+    <div class="">
+        <h1 class="text-3xl text-zinc-200">Boost</h1>
+        <div
+            class="mt-4 flex flex-row items-center justify-center gap-x-4 rounded-xl border border-zinc-900 bg-zinc-700 p-2 px-6"
+        >
+            <div class="flex w-20 flex-col items-end gap-y-1.5">
+                <div
+                    class="chakra-petch-regular inline-block w-full rounded-md bg-gray-900 px-2 pt-0.5 text-end align-middle text-2xl text-gray-300"
+                >
+                    {#if started}
+                        {gainBoost.current.toFixed(2)}
+                    {:else}
+                        N/A
+                    {/if}
+                </div>
+                <div
+                    class="chakra-petch-regular inline-block w-full rounded-md bg-gray-900 px-2 pt-0.5 text-end align-middle text-2xl text-gray-400"
+                >
+                    {toOffset(gainBoost.delta)}
+                </div>
+            </div>
+            <div class="text-4xl">→</div>
+            <div
+                class="chakra-petch-regular align-midlle inline-block w-24 rounded-md bg-gray-900 px-2 py-1 pt-1.5 text-center text-4xl"
+            >
+                {#if started}
+                    {(gainBoost.delta + gainBoost.current).toFixed(2)}
+                {:else}
+                    N/A
+                {/if}
+            </div>
         </div>
     </div>
 
@@ -172,7 +241,19 @@
     </div>
 </div>
 
-<svelte:window onkeydown={(e) => e.key === ' ' && player.stop()} />
+<svelte:window
+    onkeydown={(e) => {
+        e.key === ' ' && stop()
+
+        if (e.key === 'ArrowUp') {
+            addGainBoost(+0.01)
+        } else if (e.key === 'ArrowDown') {
+            addGainBoost(-0.01)
+        } else if (e.key === 'Delete') {
+            resetBoost()
+        }
+    }}
+/>
 
 <!-- $effect(() => {
     untrack(() => {
