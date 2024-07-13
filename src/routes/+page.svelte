@@ -48,6 +48,46 @@
         configs.push(newConfig)
     }
 
+    function remove(id: number) {
+        const removeIndex = configs.findIndex((c) => c.id === id)
+        if (removeIndex < 0) return
+        configs.splice(removeIndex, 1)
+    }
+
+    function moveUp(id: number) {
+        const srcIndex = configs.findIndex((c) => c.id === id)
+        if (srcIndex < 0) return // no such item
+        if (srcIndex == 0) return // no more up
+
+        const dstIndex = srcIndex - 1
+        const src = configs[srcIndex]
+        configs[srcIndex] = configs[dstIndex]
+        configs[dstIndex] = src
+    }
+
+    function moveDown(id: number) {
+        const srcIndex = configs.findIndex((c) => c.id === id)
+        if (srcIndex < 0) return // no such item
+        if (srcIndex >= configs.length - 1) return // no more down
+
+        const dstIndex = srcIndex + 1
+        const src = configs[srcIndex]
+        configs[srcIndex] = configs[dstIndex]
+        configs[dstIndex] = src
+    }
+
+    function duplicate(id: number) {
+        const srcIndex = configs.findIndex((c) => c.id === id)
+        if (srcIndex < 0) return // no such item
+
+        const duplicated = structuredClone({ ...configs[srcIndex] })
+        console.log(duplicated)
+        duplicated.id = getMaxId() + 1
+
+        // const duplicated = structuredClone(configs[srcIndex])
+        configs.splice(srcIndex + 1, 0, duplicated)
+    }
+
     function addGainBoost(offset: number) {
         if (!started) return
 
@@ -93,10 +133,21 @@
     </div>
 {/snippet}
 
-{#snippet trackBox(config: typeof configs[0])}
+{#snippet trackBox(config: typeof configs[0], index: number, len: number)}
     <div
         class="flex flex-row items-center gap-x-2 rounded-xl border border-zinc-900 bg-zinc-700 p-2"
     >
+        <button onclick={() => remove(config.id)}>Delete</button>
+        <button onclick={() => moveUp(config.id)} disabled={index <= 0} class="disabled:opacity-30"
+            >Up</button
+        >
+        <button
+            onclick={() => moveDown(config.id)}
+            disabled={index >= len - 1}
+            class="disabled:opacity-30">Down</button
+        >
+        <button onclick={() => duplicate(config.id)}>Duplicate</button>
+
         <div
             class="h-12 w-2 shrink-0 self-center rounded-xl border border-black border-opacity-50 py-1 {selectedId ===
             config.id
@@ -188,8 +239,8 @@
         {@render trackHeader()}
 
         <div class="flex flex-col items-start gap-y-2">
-            {#each configs as config (config.id)}
-                {@render trackBox(config)}
+            {#each configs as config, i (config.id)}
+                {@render trackBox(config, i, configs.length)}
             {/each}
         </div>
     </div>
