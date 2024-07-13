@@ -5,6 +5,7 @@
     import ScopeTriphase from '$lib/component/ScopeTriphase.svelte'
     import { PlaySolid, PauseSolid, GridPlusSolid as PlusIcon } from 'flowbite-svelte-icons'
     import { clamp } from '$lib/audio/utils'
+    import { profileStorage as createProfileStorage } from '$lib/storage.svelte'
 
     let started = $state(false)
     let selectedId: number = $state(-1)
@@ -136,11 +137,77 @@
             ramp = null
         }
     })
+
+    const profileStorage = createProfileStorage()
+
+    let saveNameInput = $state('')
+    let canSave = $derived(saveNameInput.trim().length > 0)
+
+    let loadNameInput: string | null = $state(null)
+    let profileLoaded: string | null = $state(null)
+
+    let canDelete = $derived(Boolean(loadNameInput))
+
+    let canLoad = $derived(
+        JSON.stringify($state.snapshot(configs)) !== profileLoaded && loadNameInput,
+    )
+
+    $effect(() => {
+        const res = profileStorage.getByName(loadNameInput)
+        profileLoaded = res == null ? null : JSON.stringify($state.snapshot(res.payload))
+    })
+
+    function saveProfile() {
+        const res = profileStorage.save(saveNameInput, $state.snapshot(configs))
+        if (res) {
+            loadNameInput = saveNameInput
+            profileLoaded = JSON.stringify($state.snapshot(configs))
+            saveNameInput = ''
+        } else {
+            saveNameInput = 'error'
+        }
+    }
+
+    function loadProfile() {
+        if (loadNameInput && loadNameInput.trim().length > 0) {
+            const payload = profileStorage.load(loadNameInput)
+            if (payload) {
+                configs = payload as any
+                profileLoaded = JSON.stringify($state.snapshot(payload))
+                // setTimeout(() => (currentLoadName = loadNameInput))
+            } else {
+                alert('No such profile')
+            }
+        }
+    }
+
+    function deleteProfile() {
+        if (loadNameInput && loadNameInput.trim().length > 0) {
+            const res = profileStorage.delete(loadNameInput)
+            if (!res) alert('no such profile')
+            loadNameInput = null
+        }
+    }
 </script>
 
 {#snippet trackHeader()}
     <div class="mb-4 flex flex-row items-center justify-start gap-x-8">
         <h1 class="text-3xl text-zinc-200">Tracks</h1>
+
+        <input bind:value={saveNameInput} />
+        <button onclick={saveProfile} disabled={!canSave} class="disabled:opacity-25">Save</button>
+
+        <select bind:value={loadNameInput} class="w-32">
+            <option value={null} selected class="text-gray-400">-- None --</option>
+            {#each profileStorage.get() as p (p.id)}
+                <option value={p.id}>{p.id}</option>
+            {/each}
+        </select>
+
+        <button onclick={loadProfile} disabled={!canLoad} class="disabled:opacity-25">Load</button>
+        <button onclick={deleteProfile} disabled={!canDelete} class="disabled:opacity-25"
+            >Delete</button
+        >
     </div>
 {/snippet}
 
