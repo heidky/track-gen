@@ -26,4 +26,5 @@
     })
 </script>
 
-<canvas class="flex overflow-hidden rounded-md" width="400" height="400" bind:this={canvas} />
+<canvas class="flex overflow-hidden rounded-md" width="400" height="400" bind:this={canvas}
+></canvas>

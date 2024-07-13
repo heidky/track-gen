@@ -2,7 +2,6 @@
     import InputBox from '$lib/component/InputBox.svelte'
     import { freq, freqDelta, gain, phase, squish } from '$lib'
     import DualOscillator, { type DualOscillatorConfig } from '$lib/audio/DualOscillator'
-    import { unstate } from 'svelte'
     import ScopeTriphase from '$lib/component/ScopeTriphase.svelte'
     import { PlaySolid, PauseSolid } from 'flowbite-svelte-icons'
     import { clamp } from '$lib/audio/utils'
@@ -43,9 +42,11 @@
 
     function add() {
         const maxId = getMaxId()
-        const prevConfig = configs.find((x) => x.id === maxId) ?? DualOscillator.defaultConfig
-        const newConfig = { ...structuredClone(unstate(prevConfig)), id: maxId + 1 }
-        configs.push(newConfig)
+        const config = structuredClone(
+            $state.snapshot(configs.find((x) => x.id === maxId) ?? DualOscillator.defaultConfig),
+        )
+        const configWithId = { ...config, id: maxId + 1 }
+        configs.push(configWithId)
     }
 
     function remove(id: number) {
@@ -80,11 +81,10 @@
         const srcIndex = configs.findIndex((c) => c.id === id)
         if (srcIndex < 0) return // no such item
 
-        const duplicated = structuredClone({ ...configs[srcIndex] })
-        console.log(duplicated)
+        const duplicated = structuredClone($state.snapshot(configs[srcIndex]))
+        // console.log(duplicated)
         duplicated.id = getMaxId() + 1
 
-        // const duplicated = structuredClone(configs[srcIndex])
         configs.splice(srcIndex + 1, 0, duplicated)
     }
 
@@ -133,7 +133,7 @@
     </div>
 {/snippet}
 
-{#snippet trackBox(config: typeof configs[0], index: number, len: number)}
+{#snippet trackBox(config: (typeof configs)[0], index: number, len: number)}
     <div
         class="flex flex-row items-center gap-x-2 rounded-xl border border-zinc-900 bg-zinc-700 p-2"
     >
@@ -153,7 +153,7 @@
             config.id
                 ? 'bg-orange-500'
                 : 'bg-zinc-500'}"
-        />
+        ></div>
         <!-- <span class="text-xl font-bold text-gray-400">~</span> -->
         <div class="flex w-40 flex-col gap-y-2">
             <div class="flex flex-row gap-x-1">
