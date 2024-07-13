@@ -3,7 +3,7 @@
     import { freq, freqDelta, gain, phase, squish } from '$lib'
     import DualOscillator, { type DualOscillatorConfig } from '$lib/audio/DualOscillator'
     import ScopeTriphase from '$lib/component/ScopeTriphase.svelte'
-    import { PlaySolid, PauseSolid } from 'flowbite-svelte-icons'
+    import { PlaySolid, PauseSolid, GridPlusSolid as PlusIcon } from 'flowbite-svelte-icons'
     import { clamp } from '$lib/audio/utils'
 
     let started = $state(false)
@@ -141,11 +141,6 @@
 {#snippet trackHeader()}
     <div class="mb-4 flex flex-row items-center justify-start gap-x-8">
         <h1 class="text-3xl text-zinc-200">Tracks</h1>
-
-        <button
-            class="flex size-8 justify-center rounded-md bg-gray-700 px-3 py-0 text-lg font-bold hover:bg-gray-600"
-            onclick={add}>+</button
-        >
     </div>
 {/snippet}
 
@@ -258,6 +253,16 @@
             {#each configs as config, i (config.id)}
                 {@render trackBox(config, i, configs.length)}
             {/each}
+
+            <div class="mt-2 flex flex-col items-center self-stretch">
+                <button
+                    class="flex justify-center rounded-md bg-gray-700 px-3 py-1 text-base text-gray-300 hover:bg-gray-600"
+                    onclick={add}
+                >
+                    <PlusIcon class="mr-2 size-6" />
+                    Add Track</button
+                >
+            </div>
         </div>
     </div>
 
