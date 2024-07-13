@@ -131,6 +131,10 @@ export default class DualOscillator {
         return this.volumeGain.gain.value
     }
 
+    getRampGain(): number {
+        return this.output.gain.value
+    }
+
     static sanitazieConfig(config: DualOscillatorConfig) {
         const c = { ...config }
 

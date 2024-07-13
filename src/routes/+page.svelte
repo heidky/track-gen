@@ -120,6 +120,22 @@
     }
 
     add()
+
+    let ramp: number | null = $state(null)
+
+    $effect(() => {
+        if (started) {
+            const interval = setInterval(() => {
+                ramp = player.getRampGain()
+            }, 1000 / 60)
+
+            return () => {
+                clearInterval(interval)
+            }
+        } else {
+            ramp = null
+        }
+    })
 </script>
 
 {#snippet trackHeader()}
@@ -245,36 +261,55 @@
         </div>
     </div>
 
-    <div class="">
+    <div class="flex flex-col">
         <h1 class="text-3xl text-zinc-200">Boost</h1>
-        <div
-            class="mt-4 flex flex-row items-center justify-center gap-x-4 rounded-xl border border-zinc-900 bg-zinc-700 p-2 px-6"
-        >
-            <div class="flex w-20 flex-col items-end gap-y-1.5">
+        <div class="mt-4 flex flex-row items-center">
+            <div
+                class="flex flex-row items-center justify-center gap-x-4 rounded-xl border border-zinc-900 bg-zinc-700 p-2 px-6"
+            >
+                <div class="flex w-20 flex-col items-end gap-y-1.5">
+                    <div
+                        class="chakra-petch-regular inline-block w-full rounded-md bg-gray-900 px-2 pt-0.5 text-end align-middle text-2xl text-gray-300"
+                    >
+                        {#if started}
+                            {gainBoost.current.toFixed(2)}
+                        {:else}
+                            N/A
+                        {/if}
+                    </div>
+                    <div
+                        class="chakra-petch-regular inline-block w-full rounded-md bg-gray-900 px-2 pt-0.5 text-end align-middle text-2xl text-gray-400"
+                    >
+                        {toOffset(gainBoost.delta)}
+                    </div>
+                </div>
+                <div class="text-4xl">→</div>
                 <div
-                    class="chakra-petch-regular inline-block w-full rounded-md bg-gray-900 px-2 pt-0.5 text-end align-middle text-2xl text-gray-300"
+                    class="chakra-petch-regular align-midlle inline-block w-24 rounded-md bg-gray-900 px-2 py-1 pt-1.5 text-center text-4xl"
                 >
                     {#if started}
-                        {gainBoost.current.toFixed(2)}
+                        <span
+                            class={gainBoost.delta > 0
+                                ? 'text-yellow-500'
+                                : gainBoost.delta < 0
+                                  ? 'text-blue-900'
+                                  : ''}
+                        >
+                            {(gainBoost.delta + gainBoost.current).toFixed(2)}
+                        </span>
                     {:else}
                         N/A
                     {/if}
                 </div>
-                <div
-                    class="chakra-petch-regular inline-block w-full rounded-md bg-gray-900 px-2 pt-0.5 text-end align-middle text-2xl text-gray-400"
-                >
-                    {toOffset(gainBoost.delta)}
-                </div>
             </div>
-            <div class="text-4xl">→</div>
+
             <div
-                class="chakra-petch-regular align-midlle inline-block w-24 rounded-md bg-gray-900 px-2 py-1 pt-1.5 text-center text-4xl"
+                class="relative ml-2 h-5/6 w-2 overflow-clip rounded-xl border border-zinc-900 bg-gray-500"
             >
-                {#if started}
-                    {(gainBoost.delta + gainBoost.current).toFixed(2)}
-                {:else}
-                    N/A
-                {/if}
+                <p
+                    class={`absolute w-full ${ramp == 1.0 ? 'bg-green-400' : 'bg-yellow-400'}`}
+                    style={'bottom:0;top:' + `${100 - (ramp || 0.0) * 100}%`}
+                ></p>
             </div>
         </div>
     </div>
