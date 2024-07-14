@@ -203,48 +203,51 @@
 {#snippet trackHeader()}
     <div class="mb-4 flex w-full flex-col justify-start gap-x-8">
         <h1 class="mb-2 text-3xl text-zinc-200">Tracks</h1>
+        {@render trackProfilesBar()}
+    </div>
+{/snippet}
 
-        <div class="flex flex-row items-center gap-x-4">
-            <div class="flex flex-row items-center gap-x-2">
-                <select
-                    bind:value={loadNameInput}
-                    class={`w-32 rounded-md px-2 py-1 ${loadNameInput == null && 'text-gray-400'}`}
-                >
-                    <option value={null} selected class="text-gray-400">-- None --</option>
-                    {#each profileStorage.get() as p (p.id)}
-                        <option value={p.id} class="text-white">{p.id}</option>
-                    {/each}
-                </select>
+{#snippet trackProfilesBar()}
+    <div class="flex flex-row items-center gap-x-4">
+        <div class="flex flex-row items-center gap-x-2">
+            <select
+                bind:value={loadNameInput}
+                class={`w-32 rounded-md px-2 py-1 ${loadNameInput == null && 'text-gray-400'}`}
+            >
+                <option value={null} selected class="text-gray-400">-- None --</option>
+                {#each profileStorage.get() as p (p.id)}
+                    <option value={p.id} class="text-white">{p.id}</option>
+                {/each}
+            </select>
 
-                <button
-                    onclick={loadProfile}
-                    disabled={!canLoad}
-                    class="block rounded-md border border-zinc-600 p-1 enabled:hover:bg-gray-300 disabled:opacity-30"
-                    ><LoadIcon class="size-6" /></button
-                >
-                <button
-                    onclick={deleteProfile}
-                    disabled={!canDelete}
-                    class="block rounded-md border border-zinc-600 p-1 enabled:hover:bg-gray-300 disabled:opacity-30"
-                    ><DeleteIcon class="size-6" /></button
-                >
-            </div>
+            <button
+                onclick={loadProfile}
+                disabled={!canLoad}
+                class="block rounded-md border border-zinc-600 p-1 enabled:hover:bg-gray-300 disabled:opacity-30"
+                ><LoadIcon class="size-6" /></button
+            >
+            <button
+                onclick={deleteProfile}
+                disabled={!canDelete}
+                class="block rounded-md border border-zinc-600 p-1 enabled:hover:bg-gray-300 disabled:opacity-30"
+                ><DeleteIcon class="size-6" /></button
+            >
+        </div>
 
-            <div class="flex grow"></div>
+        <div class="flex grow"></div>
 
-            <div class="flex flex-row items-center gap-x-2">
-                <input
-                    bind:value={saveNameInput}
-                    class="w-32 rounded-md px-2 py-1"
-                    placeholder="Save as..."
-                />
-                <button
-                    onclick={saveProfile}
-                    disabled={!canSave}
-                    class="block rounded-md border border-zinc-600 p-1 enabled:hover:bg-gray-300 disabled:opacity-30"
-                    ><SaveIcon class="size-6" /></button
-                >
-            </div>
+        <div class="flex flex-row items-center gap-x-2">
+            <input
+                bind:value={saveNameInput}
+                class="w-32 rounded-md px-2 py-1"
+                placeholder="Save as..."
+            />
+            <button
+                onclick={saveProfile}
+                disabled={!canSave}
+                class="block rounded-md border border-zinc-600 p-1 enabled:hover:bg-gray-300 disabled:opacity-30"
+                ><SaveIcon class="size-6" /></button
+            >
         </div>
     </div>
 {/snippet}
@@ -289,12 +292,12 @@
             >
         </div>
 
-        <div
+        <p
             class="h-12 w-2 shrink-0 self-center rounded-xl border border-black border-opacity-50 py-1 {selectedId ===
             config.id
                 ? 'bg-orange-500'
                 : 'bg-zinc-500'}"
-        ></div>
+        ></p>
         <!-- <span class="text-xl font-bold text-gray-400">~</span> -->
         <div class="flex w-40 flex-col gap-y-2">
             <div class="flex flex-row gap-x-1">
@@ -375,27 +378,7 @@
     </div>
 {/snippet}
 
-<div class="flex flex-row gap-x-32">
-    <div class="flex flex-col items-start">
-        {@render trackHeader()}
-
-        <div class="flex flex-col items-start gap-y-2">
-            {#each configs as config, i (config.id)}
-                {@render trackBox(config, i, configs.length)}
-            {/each}
-
-            <div class="mt-2 flex flex-col items-center self-stretch">
-                <button
-                    class="flex justify-center rounded-md bg-gray-700 px-3 py-1 text-base text-gray-300 hover:bg-gray-600"
-                    onclick={add}
-                >
-                    <PlusIcon class="mr-2 size-6" />
-                    Add Track</button
-                >
-            </div>
-        </div>
-    </div>
-
+{#snippet boostPanel()}
     <div class="flex flex-col">
         <h1 class="text-3xl text-zinc-200">Boost</h1>
         <div class="mt-4 flex flex-row items-center">
@@ -448,7 +431,34 @@
             </div>
         </div>
     </div>
+{/snippet}
 
+<div class="flex flex-row gap-x-32">
+    <!-- Tracks Panel -->
+    <div class="flex flex-col items-start">
+        {@render trackHeader()}
+
+        <div class="flex flex-col items-start gap-y-2">
+            {#each configs as config, i (config.id)}
+                {@render trackBox(config, i, configs.length)}
+            {/each}
+
+            <div class="mt-2 flex flex-col items-center self-stretch">
+                <button
+                    class="flex justify-center rounded-md bg-gray-700 px-3 py-1 text-base text-gray-300 hover:bg-gray-600"
+                    onclick={add}
+                >
+                    <PlusIcon class="mr-2 size-6" />
+                    Add Track</button
+                >
+            </div>
+        </div>
+    </div>
+
+    <!-- Boost Panel -->
+    {@render boostPanel()}
+
+    <!-- Scope Panel -->
     <div>
         <h1 class="mb-4 text-3xl text-zinc-200">Scope</h1>
 
@@ -475,17 +485,3 @@
         }
     }}
 />
-
-<!-- $effect(() => {
-    untrack(() => {
-        const data = localStorage.getItem('configs-base')
-        if (!data) return
-        configs = JSON.parse(data) as any
-        console.log('loaded', unstate(configs))
-    })
-})
-
-$effect(() => {
-    localStorage.setItem('configs-base', JSON.stringify(configs))
-    console.log('stored')
-}) -->
