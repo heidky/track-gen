@@ -3,9 +3,19 @@
     import { freq, freqDelta, gain, phase, squish } from '$lib'
     import DualOscillator, { type DualOscillatorConfig } from '$lib/audio/DualOscillator'
     import ScopeTriphase from '$lib/component/ScopeTriphase.svelte'
-    import { PlaySolid, PauseSolid, GridPlusSolid as PlusIcon } from 'flowbite-svelte-icons'
     import { clamp } from '$lib/audio/utils'
     import { profileStorage as createProfileStorage } from '$lib/storage.svelte'
+    import {
+        PlaySolid,
+        PauseSolid,
+        GridPlusSolid as PlusIcon,
+        CaretUpSolid as UpIcon,
+        CaretDownSolid as DownIcon,
+        TrashBinSolid as DeleteIcon,
+        FileCopyAltSolid as DuplicateIcon,
+        DownloadSolid as LoadIcon,
+        FloppyDiskSolid as SaveIcon,
+    } from 'flowbite-svelte-icons'
 
     let started = $state(false)
     let selectedId: number = $state(-1)
@@ -213,18 +223,43 @@
 
 {#snippet trackBox(config: (typeof configs)[0], index: number, len: number)}
     <div
-        class="flex flex-row items-center gap-x-2 rounded-xl border border-zinc-900 bg-zinc-700 p-2"
+        class="relative flex flex-row items-center gap-x-2 rounded-xl border border-zinc-900 bg-zinc-700 p-2"
     >
-        <button onclick={() => remove(config.id)}>Delete</button>
-        <button onclick={() => moveUp(config.id)} disabled={index <= 0} class="disabled:opacity-30"
-            >Up</button
+        <h2
+            class="chakra-petch-regular absolute bottom-0 right-full top-0 mr-2 mt-1 size-4 text-center text-xl font-bold text-gray-500"
         >
-        <button
-            onclick={() => moveDown(config.id)}
-            disabled={index >= len - 1}
-            class="disabled:opacity-30">Down</button
-        >
-        <button onclick={() => duplicate(config.id)}>Duplicate</button>
+            <span>
+                {config.id}
+            </span>
+        </h2>
+
+        <div class="flex flex-col justify-between gap-y-2">
+            <button
+                onclick={() => moveUp(config.id)}
+                disabled={index <= 0}
+                class="block rounded-md border border-zinc-600 p-1 enabled:hover:bg-gray-300 disabled:opacity-30"
+                ><UpIcon class="size-4" /></button
+            >
+            <button
+                onclick={() => moveDown(config.id)}
+                disabled={index >= len - 1}
+                class="block rounded-md border border-zinc-600 p-1 enabled:hover:bg-gray-300 disabled:opacity-30"
+                ><DownIcon class="size-4" /></button
+            >
+        </div>
+
+        <div class="flex flex-col justify-between gap-y-2">
+            <button
+                onclick={() => remove(config.id)}
+                class="block rounded-md border border-zinc-600 p-1 text-red-400 enabled:hover:text-red-500 disabled:opacity-30"
+                ><DeleteIcon class="size-4" /></button
+            >
+            <button
+                onclick={() => duplicate(config.id)}
+                class="block rounded-md border border-zinc-600 p-1 text-blue-500 enabled:hover:text-blue-600 disabled:opacity-30"
+                ><DuplicateIcon class="size-4" /></button
+            >
+        </div>
 
         <div
             class="h-12 w-2 shrink-0 self-center rounded-xl border border-black border-opacity-50 py-1 {selectedId ===
@@ -313,7 +348,7 @@
 {/snippet}
 
 <div class="flex flex-row gap-x-32">
-    <div class="">
+    <div class="flex flex-col items-start">
         {@render trackHeader()}
 
         <div class="flex flex-col items-start gap-y-2">
