@@ -1,1 +1,0 @@
-import{g as r,h as i,k as d,t as l,m as s,r as o}from"../chunks/disclose-version.B2QKOKZv.js";function f(a,t,e,n){r&&i(),t===void 0||t(a,e)}function u(a){var e;var t=(e=a.$$slots)==null?void 0:e.default;return t===!0?a.children:t}var c=l('<div class="m-10"><!></div>');function h(a,t){var e=c(),n=s(e);f(n,u(t),{}),o(e),d(a,e)}export{h as component};
