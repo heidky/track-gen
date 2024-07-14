@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { drawSignal } from '$lib/audio/utils'
+    import { drawSignal } from './scope'
     import * as Tone from 'tone'
 
     const FPS = 30
@@ -23,4 +23,5 @@
     })
 </script>
 
-<canvas class="flex overflow-hidden rounded-md" width="400" height="200" bind:this={canvas} />
+<canvas class="flex overflow-hidden rounded-md" width="400" height="200" bind:this={canvas}
+></canvas>

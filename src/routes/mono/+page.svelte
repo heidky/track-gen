@@ -5,7 +5,7 @@
     import BaseOscillator, { getDefaultConfig } from '$lib/audio/BaseOscillator'
     import InputBox from '$lib/component/InputBox.svelte'
     import Scope from '$lib/component/Scope.svelte'
-    import { unstate, untrack } from 'svelte'
+    import { untrack } from 'svelte'
 
     let started = $state(false)
     let selected: any = $state(null)
@@ -40,7 +40,7 @@
             const data = localStorage.getItem('configs-base')
             if (!data) return
             configs = JSON.parse(data) as any
-            console.log('loaded', unstate(configs))
+            console.log('loaded', $state.snapshot(configs))
         })
     })
 
