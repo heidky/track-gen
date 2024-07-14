@@ -201,23 +201,51 @@
 </script>
 
 {#snippet trackHeader()}
-    <div class="mb-4 flex flex-row items-center justify-start gap-x-8">
-        <h1 class="text-3xl text-zinc-200">Tracks</h1>
+    <div class="mb-4 flex w-full flex-col justify-start gap-x-8">
+        <h1 class="mb-2 text-3xl text-zinc-200">Tracks</h1>
 
-        <input bind:value={saveNameInput} />
-        <button onclick={saveProfile} disabled={!canSave} class="disabled:opacity-25">Save</button>
+        <div class="flex flex-row items-center gap-x-4">
+            <div class="flex flex-row items-center gap-x-2">
+                <select
+                    bind:value={loadNameInput}
+                    class={`w-32 rounded-md px-2 py-1 ${loadNameInput == null && 'text-gray-400'}`}
+                >
+                    <option value={null} selected class="text-gray-400">-- None --</option>
+                    {#each profileStorage.get() as p (p.id)}
+                        <option value={p.id} class="text-white">{p.id}</option>
+                    {/each}
+                </select>
 
-        <select bind:value={loadNameInput} class="w-32">
-            <option value={null} selected class="text-gray-400">-- None --</option>
-            {#each profileStorage.get() as p (p.id)}
-                <option value={p.id}>{p.id}</option>
-            {/each}
-        </select>
+                <button
+                    onclick={loadProfile}
+                    disabled={!canLoad}
+                    class="block rounded-md border border-zinc-600 p-1 enabled:hover:bg-gray-300 disabled:opacity-30"
+                    ><LoadIcon class="size-6" /></button
+                >
+                <button
+                    onclick={deleteProfile}
+                    disabled={!canDelete}
+                    class="block rounded-md border border-zinc-600 p-1 enabled:hover:bg-gray-300 disabled:opacity-30"
+                    ><DeleteIcon class="size-6" /></button
+                >
+            </div>
 
-        <button onclick={loadProfile} disabled={!canLoad} class="disabled:opacity-25">Load</button>
-        <button onclick={deleteProfile} disabled={!canDelete} class="disabled:opacity-25"
-            >Delete</button
-        >
+            <div class="flex grow"></div>
+
+            <div class="flex flex-row items-center gap-x-2">
+                <input
+                    bind:value={saveNameInput}
+                    class="w-32 rounded-md px-2 py-1"
+                    placeholder="Save as..."
+                />
+                <button
+                    onclick={saveProfile}
+                    disabled={!canSave}
+                    class="block rounded-md border border-zinc-600 p-1 enabled:hover:bg-gray-300 disabled:opacity-30"
+                    ><SaveIcon class="size-6" /></button
+                >
+            </div>
+        </div>
     </div>
 {/snippet}
 
